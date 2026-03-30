@@ -237,3 +237,8 @@ This project uses:
 [Dialog App](https://app.dialog.tools) | [GitHub](https://github.com/king-of-the-grackles/reddit-research-mcp) | [Report Issues](https://github.com/king-of-the-grackles/reddit-research-mcp/issues)
 
 </div>
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/king-of-the-grackles-reddit-research-mcp).
+
