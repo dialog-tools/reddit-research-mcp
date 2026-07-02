@@ -2,29 +2,29 @@ mcp-name: io.github.king-of-the-grackles/reddit-research-mcp
 
 # Dialog MCP Server
 
-**AI-Powered Reddit Intelligence for Market Research & Competitive Analysis**
+**Open source Reddit intelligence, part of the research engine that powers [Dialog](https://app.dialog.tools)**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/Built%20with-FastMCP-orange.svg)](https://github.com/jlowin/fastmcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Version**: 1.0.0
+**Version**: 1.0.1
 
 ---
 
-Turn Reddit's chaos into actionable insights. Dialog is your all-in-one Reddit intelligence platform for competitive analysis, market research, and customer discovery across 20,000+ active subreddits.
+Turn Reddit's chaos into evidence-backed insights. This MCP server gives any AI assistant semantic search across 20,000+ active subreddits, deep-dive access to posts and comment threads, and saved feeds for ongoing monitoring. Every finding comes with citations to real posts and comments.
 
-This is the official MCP server powering [Dialog](https://app.dialog.tools) - the AI-powered Reddit research platform built for indie hackers, SaaS founders, product managers, and market researchers.
+It's fully usable on its own, for free, in Claude Code, Cursor, Codex, Gemini CLI, or any MCP-compatible client. It's also part of the research engine that powers [Dialog](https://app.dialog.tools), the AI agent platform for continuous market intelligence, where it ships connected to every agent.
 
 ---
 
-## Why Dialog?
+## Why This Server?
 
 **Evidence-based insights with full citations.** Every finding links back to real Reddit posts and comments with upvote counts, awards, and direct URLs. When you say "users are complaining about X," you'll have the receipts to prove it.
 
 **Zero-friction setup.** No Reddit API credentials needed. No terminal commands. No credential management. Just connect and start researching.
 
-**Semantic search at scale.** Reddit's API caps at 250 search results. Dialog searches conceptually across 20,000+ indexed subreddits using vector embeddings, finding relevant communities you didn't know existed.
+**Semantic search at scale.** Reddit's API caps at 250 search results. This server searches conceptually across 20,000+ indexed subreddits using vector embeddings, finding relevant communities you didn't know existed.
 
 **Persistent research management.** Save subreddit collections into feeds for ongoing monitoring. Perfect for long-term competitive analysis and market research campaigns.
 
@@ -91,6 +91,12 @@ Track adoption trends, concerns, success stories, and emerging use cases with te
 ```
 Identify pain points and validate your solution with evidence from actual Reddit discussions, not assumptions.
 
+### Ongoing Monitoring
+```
+"Save these communities as a feed so we can track competitor sentiment over time"
+```
+Build curated feeds of the communities that matter to you, then come back to them in any session. Want this to run on a schedule and land in Slack? That's what [Dialog](https://app.dialog.tools) adds on top.
+
 ---
 
 ## Server Capabilities
@@ -133,7 +139,7 @@ Identify pain points and validate your solution with evidence from actual Reddit
 <details>
 <summary><strong>Three-Layer MCP Architecture</strong></summary>
 
-Dialog follows the **layered abstraction pattern** for scalability and self-documentation:
+The server follows the **layered abstraction pattern** for scalability and self-documentation:
 
 ### Layer 1: Discovery
 ```python
@@ -195,7 +201,7 @@ Feeds let you save research configurations for ongoing monitoring:
 <details>
 <summary><strong>Authentication</strong></summary>
 
-Dialog uses **Descope OAuth2** for secure authentication:
+The server uses **Descope OAuth2** for secure authentication:
 
 - **Setup**: No Reddit credentials needed - server handles authentication
 - **Token**: Automatically managed by your MCP client
@@ -206,15 +212,20 @@ Dialog uses **Descope OAuth2** for secure authentication:
 
 ---
 
-## The Dialog Platform
+## Want This Running on Autopilot? Meet Dialog
 
-This MCP server is the backend for [Dialog](https://app.dialog.tools), a complete Reddit intelligence platform featuring:
+This server is free and fully usable standalone. [Dialog](https://app.dialog.tools) is the hosted platform where it plugs into a larger research engine: AI agents that combine this Reddit server with 45+ other integrations to run your research continuously and deliver the results where you work.
 
-- **Chat Interface** - Natural language research powered by Claude AI
-- **Feed Management** - Create and manage curated subreddit collections
-- **Consolidated Views** - See hot posts from all your tracked subreddits in one place
-- **Cross-Device Sync** - Chat history and feeds sync across devices
-- **Visual Analytics** - Sentiment gauges, trend charts, and engagement metrics
+| | This MCP server (free, open source) | Dialog platform |
+|---|---|---|
+| **Reddit research** | Full access: semantic discovery, search, posts, comments, feeds | This same server, connected by default to every agent |
+| **How it runs** | On demand, inside your AI assistant | Autonomous agents powered by Claude that plan and execute multi-step research |
+| **Scheduling** | Manual, session by session | Automations that run on a schedule and land in a persistent inbox |
+| **Delivery** | Your chat window | Formatted reports with inline charts in Slack, Telegram, or the web app |
+| **Data sources** | Reddit | Reddit plus 45+ integrations: Gmail, Slack, Linear, HubSpot, Apollo, PostHog, Google Drive, and more |
+| **Memory** | Per session | Persistent agent workspaces that build context over time |
+
+A typical Dialog workflow: an agent monitors your competitors' communities every Monday morning, cross-references mentions against your CRM, and posts a formatted report with charts to your team's Slack channel before standup.
 
 [Try Dialog Free](https://app.dialog.tools)
 
@@ -222,11 +233,29 @@ This MCP server is the backend for [Dialog](https://app.dialog.tools), a complet
 
 ## Contributing
 
-This project uses:
+Contributions are welcome. The stack:
+
 - Python 3.11+ with type hints
-- FastMCP for the server framework
+- [FastMCP](https://github.com/jlowin/fastmcp) for the server framework
 - ChromaDB for semantic search
 - PRAW for Reddit API interaction
+
+### Local Development
+
+```bash
+# Clone and install (uses uv)
+git clone https://github.com/king-of-the-grackles/reddit-research-mcp.git
+cd reddit-research-mcp
+uv sync --extra dev
+
+# Run tests
+uv run pytest
+
+# Run the server locally
+uv run reddit-mcp
+```
+
+Found a bug or have a feature idea? [Open an issue](https://github.com/king-of-the-grackles/reddit-research-mcp/issues).
 
 ---
 
