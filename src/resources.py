@@ -176,7 +176,7 @@ def register_resources(mcp, reddit: praw.Reddit) -> None:
                         "4. get_operation_schema('fetch_multiple') - Get batch fetch requirements",
                         "5. execute_operation('fetch_multiple', {'subreddit_names': [...], 'limit_per_subreddit': 10})",
                         "6. get_operation_schema('fetch_comments') - Get comment requirements",
-                        "7. execute_operation('fetch_comments', {'submission_id': 'abc123', 'comment_limit': 100})"
+                        "7. execute_operation('fetch_comments', {'url': 'https://reddit.com/r/Python/comments/abc123/', 'comment_limit': 100})"
                     ]
                 },
                 "targeted_search": {

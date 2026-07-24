@@ -498,15 +498,16 @@ def get_operation_schema(
         "fetch_comments": {
             "description": "Get complete comment tree for a post",
             "parameters": {
-                "submission_id": {
-                    "type": "string",
-                    "required_one_of": ["submission_id", "url"],
-                    "description": "Reddit post ID (e.g., '1abc234')"
-                },
                 "url": {
                     "type": "string",
                     "required_one_of": ["submission_id", "url"],
-                    "description": "Full Reddit URL to the post"
+                    "description": "Full Reddit URL to the post",
+                    "tip": "Prefer url over submission_id — activity feeds show the subreddit from the url (e.g. 'Reading r/Python discussion')"
+                },
+                "submission_id": {
+                    "type": "string",
+                    "required_one_of": ["submission_id", "url"],
+                    "description": "Reddit post ID (e.g., '1abc234'); use only when no url is available"
                 },
                 "comment_limit": {
                     "type": "integer",
@@ -522,8 +523,8 @@ def get_operation_schema(
                 }
             },
             "examples": [] if not include_examples else [
-                {"submission_id": "1abc234", "comment_limit": 100},
-                {"url": "https://reddit.com/r/Python/comments/xyz789/", "comment_limit": 50, "comment_sort": "top"}
+                {"url": "https://reddit.com/r/Python/comments/xyz789/", "comment_limit": 50, "comment_sort": "top"},
+                {"submission_id": "1abc234", "comment_limit": 100}
             ]
         },
         "create_feed": {
@@ -837,7 +838,7 @@ execute_operation("fetch_multiple", {{
 ### PHASE 4: DEEP DIVE INTO DISCUSSIONS
 For posts with high engagement (10+ comments, 5+ upvotes):
 execute_operation("fetch_comments", {{
-    "submission_id": "<post_id>",
+    "url": "<post_url>",
     "comment_limit": 100,
     "comment_sort": "best"
 }})
