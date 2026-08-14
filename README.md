@@ -34,19 +34,19 @@ It's fully usable on its own, for free, in Claude Code, Cursor, Codex, Gemini CL
 
 ### Claude Code
 ```bash
-claude mcp add --scope local --transport http dialog-mcp https://reddit-research-mcp.onrender.com/mcp
+claude mcp add --scope local --transport http dialog-mcp https://mcp.dialog.tools/mcp
 ```
 
 ### Cursor
 ```
-cursor://anysphere.cursor-deeplink/mcp/install?name=dialog-mcp&config=eyJ1cmwiOiJodHRwczovL3JlZGRpdC1yZXNlYXJjaC1tY3Aub25yZW5kZXIuY29tL21jcCJ9
+cursor://anysphere.cursor-deeplink/mcp/install?name=dialog-mcp&config=eyJ1cmwiOiJodHRwczovL21jcC5kaWFsb2cudG9vbHMvbWNwIn0%3D
 ```
 
 ### OpenAI Codex CLI
 ```bash
 codex mcp add dialog-mcp \
     npx -y mcp-remote \
-    https://reddit-research-mcp.onrender.com/mcp \
+    https://mcp.dialog.tools/mcp \
     --auth-timeout 120 \
     --allow-http \
 ```
@@ -55,13 +55,13 @@ codex mcp add dialog-mcp \
 ```bash
 gemini mcp add dialog-mcp \
   npx -y mcp-remote \
-  https://reddit-research-mcp.onrender.com/mcp \
+  https://mcp.dialog.tools/mcp \
   --auth-timeout 120 \
   --allow-http
 ```
 
 ### Direct MCP Server URL
-For other AI assistants: `https://reddit-research-mcp.onrender.com/mcp`
+For other AI assistants: `https://mcp.dialog.tools/mcp`
 
 ---
 

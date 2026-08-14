@@ -18,7 +18,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.7
       - key: SERVER_URL
-        value: https://reddit-research-mcp.onrender.com
+        value: https://mcp.dialog.tools
       - key: DESCOPE_PROJECT_ID
         value: P33G9OI0uZKubCM9c3RE9KGxPJbn
       - key: DESCOPE_BASE_URL
