@@ -34,7 +34,7 @@ It's fully usable on its own, for free, in Claude Code, Cursor, Codex, Gemini CL
 
 ### Claude Code
 ```bash
-claude mcp add --scope local --transport http dialog-mcp https://reddit-research-mcp.fastmcp.app/mcp
+claude mcp add --scope local --transport http dialog-mcp https://reddit-research-mcp.onrender.com/mcp
 ```
 
 ### Cursor
@@ -46,7 +46,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=dialog-mcp&config=eyJ1cmwiOi
 ```bash
 codex mcp add dialog-mcp \
     npx -y mcp-remote \
-    https://reddit-research-mcp.fastmcp.app/mcp \
+    https://reddit-research-mcp.onrender.com/mcp \
     --auth-timeout 120 \
     --allow-http \
 ```
@@ -55,13 +55,13 @@ codex mcp add dialog-mcp \
 ```bash
 gemini mcp add dialog-mcp \
   npx -y mcp-remote \
-  https://reddit-research-mcp.fastmcp.app/mcp \
+  https://reddit-research-mcp.onrender.com/mcp \
   --auth-timeout 120 \
   --allow-http
 ```
 
 ### Direct MCP Server URL
-For other AI assistants: `https://reddit-research-mcp.fastmcp.app/mcp`
+For other AI assistants: `https://reddit-research-mcp.onrender.com/mcp`
 
 ---
 
