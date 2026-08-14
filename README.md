@@ -39,7 +39,7 @@ claude mcp add --scope local --transport http dialog-mcp https://reddit-research
 
 ### Cursor
 ```
-cursor://anysphere.cursor-deeplink/mcp/install?name=dialog-mcp&config=eyJ1cmwiOiJodHRwczovL3JlZGRpdC1yZXNlYXJjaC1tY3AuZmFzdG1jcC5hcHAvbWNwIn0%3D
+cursor://anysphere.cursor-deeplink/mcp/install?name=dialog-mcp&config=eyJ1cmwiOiJodHRwczovL3JlZGRpdC1yZXNlYXJjaC1tY3Aub25yZW5kZXIuY29tL21jcCJ9
 ```
 
 ### OpenAI Codex CLI
