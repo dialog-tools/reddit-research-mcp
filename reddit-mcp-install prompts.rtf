@@ -9,15 +9,15 @@
 \
 claude mcp add --scope local --transport http stage-reddit-research-mcp https://reddit-research-mcp-feat-add-descope-authen1d03-aeaedb25.fastmcp.app/mcp\
 \
-claude mcp add --scope local --transport http reddit-research-mcp https://reddit-research-mcp.fastmcp.app/mcp\
+claude mcp add --scope local --transport http reddit-research-mcp https://mcp.dialog.tools/mcp\
 \
 codex mcp add -- staging-reddit-research-mcp npx -y mcp-remote@latest https://reddit-research-mcp-feat-add-descope-authen1d03-aeaedb25.fastmcp.app/mcp\
 \
-codex mcp add -- reddit-research-mcp npx -y mcp-remote@latest https://reddit-research-mcp.fastmcp.app/mcp\
+codex mcp add -- reddit-research-mcp npx -y mcp-remote@latest https://mcp.dialog.tools/mcp\
 \
-codex mcp add -- prod-reddit-research-mcp npx -y mcp-remote@latest https://reddit-research-mcp.fastmcp.app/mcp\
+codex mcp add -- prod-reddit-research-mcp npx -y mcp-remote@latest https://mcp.dialog.tools/mcp\
 \
-codex mcp add -- reddit-research-mcp npx -y https://reddit-research-mcp.fastmcp.app/mcp\
+codex mcp add -- reddit-research-mcp npx -y https://mcp.dialog.tools/mcp\
 \
 \
 Local-reddit-research-mcp MCP Server                                                                                   \uc0\u9474 \
@@ -30,7 +30,7 @@ Local-reddit-research-mcp MCP Server                                            
 \uc0\u9474  location:     software-projects/MCP/reddit-mcp-poc/reddit-research-mcp]          \
 \
 \
-codex mcp add -- reddit-research-mcp npx -y mcp-remote@latest https://reddit-research-mcp.fastmcp.app/mcp\
+codex mcp add -- reddit-research-mcp npx -y mcp-remote@latest https://mcp.dialog.tools/mcp\
 \
 codex mcp add local-reddit-research-mcp \\                               \uc0\u9474 \
      \uc0\u9474    npx -y mcp-remote \\                                                   \u9474 \
@@ -82,17 +82,17 @@ gemini mcp add staging-reddit-research-mcp \\\
 \
 Production Server Install Commands\
 \
-claude mcp add --scope local --transport http reddit-research-mcp https://reddit-research-mcp.fastmcp.app/mcp\
+claude mcp add --scope local --transport http reddit-research-mcp https://mcp.dialog.tools/mcp\
 \
 codex mcp add reddit-research-mcp \\\
     npx -y mcp-remote \\\
-    https://reddit-research-mcp.fastmcp.app/mcp \\\
+    https://mcp.dialog.tools/mcp \\\
     --auth-timeout 120 \\\
     --allow-http \\\
 \
 gemini mcp add reddit-research-mcp \\\
   npx -y mcp-remote \\\
-  https://reddit-research-mcp.fastmcp.app/mcp \\\
+  https://mcp.dialog.tools/mcp \\\
   --auth-timeout 120 \\\
   --allow-http\
 \

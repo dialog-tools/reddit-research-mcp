@@ -158,7 +158,7 @@ The `/specs` directory contains AI-generated architecture documents:
 
 **Claude Code:**
 ```bash
-claude mcp add --scope local --transport http reddit-research-mcp https://reddit-research-mcp.fastmcp.app/mcp
+claude mcp add --scope local --transport http reddit-research-mcp https://mcp.dialog.tools/mcp
 ```
 
 **For local development:**

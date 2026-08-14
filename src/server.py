@@ -226,11 +226,11 @@ async def mcp_config(request) -> Response:
 
 
 # RFC 9728 Protected Resource Metadata — user-registered shadow of the
-# framework-provided PRM route. fastmcp.app's AWS edge currently returns 405
-# for the framework-registered /.well-known/oauth-protected-resource/mcp
-# without forwarding to origin; this custom route reaches origin through the
-# same edge path as the working /.well-known/mcp-config above. Remove when
-# FastMCP Cloud fixes the edge routing.
+# framework-provided PRM route. Originally added because fastmcp.app's AWS
+# edge returned 405 for the framework-registered route without forwarding to
+# origin. Production now runs on Render (mcp.dialog.tools) where the framework
+# route works, but the legacy fastmcp.app deployment still auto-deploys from
+# main, so keep this until that deployment is retired.
 @mcp.custom_route("/.well-known/oauth-protected-resource/mcp", methods=["GET"])
 async def oauth_protected_resource(request) -> Response:
     server_base_url = os.getenv("SERVER_URL", "http://localhost:8000").rstrip("/")

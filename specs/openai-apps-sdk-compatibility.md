@@ -574,7 +574,7 @@ services:
       - key: DESCOPE_BASE_URL
         value: "https://api.descope.com"
       - key: SERVER_URL
-        value: "https://reddit-research-mcp.onrender.com"
+        value: "https://mcp.dialog.tools"
       - key: CHROMA_PROXY_URL
         sync: false
       - key: CHROMA_PROXY_API_KEY
@@ -910,7 +910,7 @@ REDDIT_CLIENT_SECRET=your_client_secret
 REDDIT_USER_AGENT=RedditMCP:v1.0:reddit-research-mcp
 DESCOPE_PROJECT_ID=your_descope_project_id
 DESCOPE_BASE_URL=https://api.descope.com
-SERVER_URL=https://reddit-research-mcp.onrender.com
+SERVER_URL=https://mcp.dialog.tools
 CHROMA_PROXY_URL=https://reddit-mcp-vector-db.onrender.com
 CHROMA_PROXY_API_KEY=your_chroma_api_key
 NODE_ENV=production
