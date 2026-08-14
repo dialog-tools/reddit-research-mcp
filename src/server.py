@@ -31,6 +31,11 @@ from src.tools.feed import (
     update_feed,
     delete_feed,
 )
+from src.tools.youcom_search import (
+    search_web_supplement,
+    get_search_suggestions,
+    YouSearchConfig,
+)
 from src.resources import register_resources
 
 # Configure Descope authentication with multi-issuer support
@@ -286,7 +291,9 @@ def discover_operations(ctx: Context) -> Dict[str, Any]:
             "get_feed": "Get a specific feed by ID",
             "get_feed_config": "Get feed configuration with subreddit names",
             "update_feed": "Update an existing feed",
-            "delete_feed": "Delete a feed"
+            "delete_feed": "Delete a feed",
+            "search_web_supplement": "Supplement Reddit research with You.com web search (optional)",
+            "get_search_suggestions": "Generate web search suggestions based on Reddit context (optional)"
         },
         "recommended_workflows": {
             "comprehensive_research": [
@@ -300,6 +307,10 @@ def discover_operations(ctx: Context) -> Dict[str, Any]:
             "feed_workflow": [
                 "discover_subreddits → create_feed → list_feeds",
                 "Best for: Saving research results for later use"
+            ],
+            "enhanced_research": [
+                "discover_subreddits → get_search_suggestions → search_web_supplement",
+                "Best for: Combining Reddit insights with broader web context (requires You.com configuration)"
             ]
         },
         "next_step": "Use get_operation_schema() to understand requirements"
@@ -686,6 +697,67 @@ def get_operation_schema(
             "examples": [] if not include_examples else [
                 {"feed_id": "550e8400-e29b-41d4-a716-446655440000"}
             ]
+        },
+        "search_web_supplement": {
+            "description": "Supplement Reddit research with You.com web search for broader context",
+            "parameters": {
+                "query": {
+                    "type": "string",
+                    "required": True,
+                    "description": "Search query to execute on the web",
+                    "validation": "1-200 characters"
+                },
+                "reddit_context": {
+                    "type": "string", 
+                    "required": False,
+                    "description": "Optional context from Reddit research to enhance the search",
+                    "example": "Discussion from r/MachineLearning about transformers"
+                },
+                "limit": {
+                    "type": "integer",
+                    "default": 10,
+                    "range": [1, 20],
+                    "description": "Maximum number of web results to return"
+                }
+            },
+            "returns": {
+                "status": "success/unavailable - indicates if You.com integration is configured",
+                "web_results": "Array of web search results with title, url, snippet",
+                "setup_instructions": "Configuration steps if not available"
+            },
+            "configuration": {
+                "api_key": "Set YDC_API_KEY environment variable",
+                "enable": "Set YOUCOM_SEARCH_ENABLED=true",
+                "optional": "This integration is optional - Reddit research works without it"
+            },
+            "examples": [] if not include_examples else [
+                {"query": "transformer models explained", "limit": 10},
+                {"query": "python async best practices", "reddit_context": "r/Python discussion about asyncio", "limit": 5}
+            ]
+        },
+        "get_search_suggestions": {
+            "description": "Generate web search suggestions based on Reddit research context",
+            "parameters": {
+                "reddit_query": {
+                    "type": "string", 
+                    "required": True,
+                    "description": "The original Reddit search/discovery query"
+                },
+                "subreddit_results": {
+                    "type": "array[string]",
+                    "required": False,
+                    "description": "Names of subreddits discovered or searched",
+                    "example": '["MachineLearning", "deeplearning", "artificial"]'
+                }
+            },
+            "returns": {
+                "suggested_searches": "Array of search queries optimized for web search",
+                "usage_note": "How to use with search_web_supplement"
+            },
+            "examples": [] if not include_examples else [
+                {"reddit_query": "machine learning", "subreddit_results": ["MachineLearning", "deeplearning"]},
+                {"reddit_query": "startup advice"}
+            ]
         }
     }
     
@@ -741,7 +813,9 @@ async def execute_operation(
         "get_feed": get_feed,
         "get_feed_config": get_feed_config,
         "update_feed": update_feed,
-        "delete_feed": delete_feed
+        "delete_feed": delete_feed,
+        "search_web_supplement": search_web_supplement,
+        "get_search_suggestions": get_search_suggestions
     }
 
     if operation_id not in operations:

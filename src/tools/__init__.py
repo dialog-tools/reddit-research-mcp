@@ -20,6 +20,12 @@ from .feed import (
     delete_feed,
 )
 
+from .youcom_search import (
+    search_web_supplement,
+    get_search_suggestions,
+    YouSearchConfig,
+)
+
 __all__ = [
     # Reddit discovery
     "discover_subreddits",
@@ -34,4 +40,8 @@ __all__ = [
     "get_feed",
     "update_feed",
     "delete_feed",
+    # You.com web search integration
+    "search_web_supplement",
+    "get_search_suggestions",
+    "YouSearchConfig",
 ]
