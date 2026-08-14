@@ -46,6 +46,7 @@ dev = [
 
 [project.scripts]
 reddit-mcp = "src.server:main"
+reddit-mcp-http = "src.http_server:main"
 
 [build-system]
 requires = ["hatchling"]
