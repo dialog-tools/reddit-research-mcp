@@ -1,0 +1,62 @@
+[
+  {
+    "origin": "https://mcp.dialog.tools",
+    "path": "/.well-known/oauth-protected-resource",
+    "status": 200,
+    "resource": "https://mcp.dialog.tools/mcp",
+    "identity_correct": true
+  },
+  {
+    "origin": "https://mcp.dialog.tools",
+    "path": "/.well-known/oauth-protected-resource/mcp",
+    "status": 200,
+    "resource": "https://mcp.dialog.tools/mcp",
+    "identity_correct": true
+  },
+  {
+    "origin": "https://mcp.dialog.tools",
+    "path": "/mcp",
+    "unauthenticated_status": 401,
+    "method": "GET"
+  },
+  {
+    "origin": "https://mcp.dialog.tools",
+    "metadata_equal": true
+  },
+  {
+    "origin": "https://reddit-research-mcp.fastmcp.app",
+    "path": "/.well-known/oauth-protected-resource",
+    "status": 200,
+    "resource": "https://reddit-research-mcp.fastmcp.app/mcp",
+    "identity_correct": true
+  },
+  {
+    "origin": "https://reddit-research-mcp.fastmcp.app",
+    "path": "/.well-known/oauth-protected-resource/mcp",
+    "status": 200,
+    "resource": "https://reddit-research-mcp.fastmcp.app/mcp",
+    "identity_correct": true
+  },
+  {
+    "origin": "https://reddit-research-mcp.fastmcp.app",
+    "path": "/mcp",
+    "unauthenticated_status": 405,
+    "method": "GET"
+  },
+  {
+    "origin": "https://reddit-research-mcp.fastmcp.app",
+    "metadata_equal": true
+  },
+  {
+    "origin": "https://mcp.dialog.tools",
+    "path": "/mcp",
+    "method": "POST",
+    "unauthenticated_status": 401
+  },
+  {
+    "origin": "https://reddit-research-mcp.fastmcp.app",
+    "path": "/mcp",
+    "method": "POST",
+    "unauthenticated_status": 401
+  }
+]

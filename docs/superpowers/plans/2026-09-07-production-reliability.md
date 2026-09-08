@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use `superpowers:executing-plans` to implement this plan task by task after approval. Execute inline; delegate only if separately authorized. Checkboxes track execution, not approval.
 
-**Status:** Approved by Chris ("ok proceed - approved"). Implementation is on `fix/mcp-production-reliability`; release gates and rollout are in progress. See `docs/operations/production-reliability.md` for operational status.
+**Status:** Approved by Chris ("ok proceed - approved"). The repair is merged and deployed; release gates and the first 30-minute observation passed. Alert receipt and seven-day acceptance remain pending. See `docs/operations/production-reliability.md` for operational status.
 
 **Goal:** Eliminate unbounded memory growth, keep the HTTP server responsive during upstream calls, and make production degradation visible before clients experience an outage.
 
@@ -116,7 +116,7 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 - [x] Register `/.well-known/oauth-protected-resource` alongside `/.well-known/oauth-protected-resource/mcp`, sharing the existing response implementation.
 - [x] Preserve the `/mcp` resource identity, Descope authorization-server URL, and bearer challenge. Check framework/custom route precedence so neither path shadows the wrong response.
 - [x] Test unauthenticated MCP access remains 401; both supported issuer formats still authenticate; invalid, expired, and incorrectly signed tokens remain rejected. Use synthetic signing keys and local JWKS fixtures.
-- [ ] Verify the canonical and legacy hosts advertise their own configured resource identities after deployment.
+- [x] Verify the canonical and legacy hosts advertise their own configured resource identities after deployment.
 
 **Deliverable:** Compatible public discovery at both paths with authentication behavior preserved.
 
@@ -165,10 +165,10 @@ Sources: [Render notifications](https://render.com/docs/notifications), [cron jo
 
 ## Task 8: Controlled rollout and rollback
 
-- [ ] Refresh production health/memory and record the previous deploy and configuration. If the conditional 85% mitigation threshold is reached before the fix is ready, capture diagnostics and perform the authorized known-good redeploy; record it separately from fix validation.
-- [ ] Merge only after the automated and manual gates pass. `main` auto-deploys on Render and also affects the legacy deployment; watch both. Do not trigger a duplicate deploy after the auto-deploy begins.
+- [x] Refresh production health/memory and record the previous deploy and configuration. If the conditional 85% mitigation threshold is reached before the fix is ready, capture diagnostics and perform the authorized known-good redeploy; record it separately from fix validation.
+- [x] Merge only after the automated and manual gates pass. `main` auto-deploys on Render and also affects the legacy deployment; watch both. Do not trigger a duplicate deploy after the auto-deploy begins.
 - [ ] Confirm new-instance health before traffic is routed; verify runtime versions, configuration, metadata, auth, small discovery/post/comment operations, progress delivery, resource read, and feed-list behavior. Observe reconnect behavior for a pre-existing session.
-- [ ] Observe the first 30 minutes: no sustained health failures, no memory surge, no broad auth failures, no persistent tool-error increase, and expected completion/cancellation of old-instance work. Bring the monitoring cron live and test its alert path.
+- [x] Observe the first 30 minutes: no sustained health failures, no memory surge, no broad auth failures, no persistent tool-error increase, and expected completion/cancellation of old-instance work. Bring the monitoring cron live and test its alert path.
 - [ ] Roll back immediately for failed authentication/client compatibility, sustained health failures over 60 seconds, any OOM, or 5xx/internal-error rates meeting the monitoring incident threshold in two consecutive five-minute windows attributable to the release. Also roll back a material latency regression reproduced against the same workload.
 - [ ] Restore the last known-good service deploy and changed runtime settings, then revert the responsible main-branch change so auto-deploy cannot reintroduce it. Verify the legacy deployment separately; its deploy controls differ from Render. Preserve incident evidence.
 - [ ] Repeat the same read-only smoke checks after rollback. Document that rollback can restore the old memory leak; keep the temporary mitigation rule and alerts active until a corrected release is ready.
