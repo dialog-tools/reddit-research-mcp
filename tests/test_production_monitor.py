@@ -38,6 +38,34 @@ def test_memory_samples_with_a_gap_do_not_prove_sustained_threshold():
     assert evaluate_memory([usage], [series(100)], NOW)[0]["signal"] == "telemetry"
 
 
+def test_retired_instance_history_does_not_fail_current_instance_monitoring():
+    from scripts.check_production import evaluate_memory
+    retired = series(60, "retired", age=660)
+    retired["values"] = retired["values"][-4:]
+    assert evaluate_memory([retired, series(50, "current")],
+                           [series(100, "retired"), series(100, "current")], NOW,
+                           active_instances={"current"}) == []
+
+
+def test_retired_samples_cannot_hide_missing_current_instance_telemetry():
+    from scripts.check_production import evaluate_memory
+    assert evaluate_memory([series(50, "retired")], [series(100, "retired")], NOW,
+                           active_instances={"current"})[0]["signal"] == "telemetry"
+
+
+def test_every_current_instance_requires_fresh_memory_samples():
+    from scripts.check_production import evaluate_memory
+    assert evaluate_memory([series(50), series(50, "two", age=1000)],
+                           [series(100), series(100, "two")], NOW,
+                           active_instances={"one", "two"})[0]["signal"] == "telemetry"
+
+
+def test_empty_instance_inventory_is_a_monitoring_failure():
+    from scripts.check_production import evaluate_memory
+    assert evaluate_memory([series(50)], [series(100)], NOW,
+                           active_instances=set())[0]["signal"] == "telemetry"
+
+
 @pytest.mark.parametrize("errors,total,alert", [(0,0,False),(4,1000,False),(5,1000,True),
                                               (2,100,True),(1,100,False)])
 def test_http_incident_threshold(errors,total,alert):

@@ -1,11 +1,14 @@
 # Production reliability runbook
 
-Status: implementation, 119-test CI, and the two-hour release soak passed. Production rollout,
-alert delivery verification, and the seven-day stability window remain pending.
-The monitor has been provisioned on the smallest plan with recurring checks
-held until rollout. Its labeled failure test completed; email receipt is pending.
-Chris is the operational owner and receives alerts through his existing Render
-account email destination.
+Status: **deployed; stability verification pending**. The two-hour release soak
+and first 30-minute production observation passed. The active Render cron has
+passed scheduled runs; its retired-instance telemetry correction is verified.
+The independent GitHub public check passed manually, with its first scheduled
+run still awaiting confirmation. Email receipt for both labeled alert tests is
+unconfirmed. Chris owns alert response and daily authenticated checks.
+
+See [the dated rollout record](2026-09-08-production-rollout.md) for deploy IDs,
+raw evidence, the monitoring correction, limitations, and dated checkpoints.
 
 ## Service and release references
 
@@ -16,6 +19,8 @@ account email destination.
 | Render workspace | `tea-d1rmi0p5pdvs73ea4dvg` |
 | Render MCP service | `srv-d9vekctg1s2s73fbr4l0`, 512 MiB starter, one instance |
 | Vector dependency | `srv-d2jce1re5dus738ueaug` |
+| Current deploy | `dep-daft2umq1p3s73ebfa50` |
+| Current application commit | `57ea82ed8f4cd7eaf0c3e341d60e03a0e4b21bd1` |
 | Previous known-good deploy | `dep-dadkbv3l550s73c4902g` |
 | Previous commit | `3a4935aaed74df02ba23a917b8b3d2bd7030fea1` |
 | Legacy host | https://reddit-research-mcp.fastmcp.app/mcp |
@@ -91,7 +96,10 @@ network request to ten seconds, and exits by 85 seconds.
 | Platform failure | Any native `server_failed` event in five minutes, including an explicit OOM kill even during deployment |
 | Missing telemetry | No fresh metrics/runtime samples within 15 minutes, missing limits, gaps, incomplete logs, or API/checker failure |
 
-Do not add overlapping deployment instances' memory and compare their sum with
+Use Render's current-instance inventory to select metric series; retained metrics
+from deactivated instances must not trigger missing-history alerts. Require fresh
+telemetry for every current instance. Do not add overlapping instances' memory
+and compare their sum with
 one instance's limit. A confirmed new deployment gets up to ten minutes to
 accumulate continuous memory history; absent/stale data still fails. Restart
 correlation uses a bounded 15-minute log window and the platform's deployment
@@ -197,9 +205,9 @@ authenticated checks until a renewable monitoring identity exists.
 
 | Checkpoint | Evidence/status |
 | --- | --- |
-| Deployment and first 30 minutes | Pending |
+| Deployment and first 30 minutes | Passed September 8, 09:43:27 UTC; see dated rollout record |
 | Render labeled alert receipt | Test run `crn-dafrbr8n74is73baeqq0-1788851754` emitted the labeled failure at 2026-09-08 07:16 UTC; receipt confirmation pending |
-| GitHub labeled alert receipt | Pending |
+| GitHub labeled alert receipt | Intentional test failed at 09:16 UTC; normal check subsequently passed; receipt unconfirmed |
 | 1 hour | Pending |
 | 24 hours | Pending |
 | 72 hours | Pending |

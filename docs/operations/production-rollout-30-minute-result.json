@@ -1,0 +1,96 @@
+{
+  "window_start": "2026-09-08T09:13:27Z",
+  "window_end": "2026-09-08T09:43:27Z",
+  "duration_seconds": 1800,
+  "health": {
+    "https://mcp.dialog.tools": {
+      "samples": 116,
+      "failures": 0,
+      "p95_ms": 276.34,
+      "maximum_ms": 306.15
+    },
+    "https://reddit-research-mcp.fastmcp.app": {
+      "samples": 116,
+      "failures": 0,
+      "p95_ms": 476.33,
+      "maximum_ms": 623.33
+    }
+  },
+  "request_windows": [
+    {
+      "end": "2026-09-08T09:18:27Z",
+      "requests": 437,
+      "http_5xx": 0,
+      "incident": false
+    },
+    {
+      "end": "2026-09-08T09:23:27Z",
+      "requests": 85,
+      "http_5xx": 0,
+      "incident": false
+    },
+    {
+      "end": "2026-09-08T09:28:27Z",
+      "requests": 66,
+      "http_5xx": 0,
+      "incident": false
+    },
+    {
+      "end": "2026-09-08T09:33:27Z",
+      "requests": 67,
+      "http_5xx": 0,
+      "incident": false
+    },
+    {
+      "end": "2026-09-08T09:38:27Z",
+      "requests": 43,
+      "http_5xx": 0,
+      "incident": false
+    },
+    {
+      "end": "2026-09-08T09:43:27Z",
+      "requests": 84,
+      "http_5xx": 0,
+      "incident": false
+    }
+  ],
+  "total_unique_requests": 782,
+  "total_http_5xx": 0,
+  "platform_failures": [],
+  "runtime_boots": 1,
+  "runtime_samples": 31,
+  "latest_runtime_sample": {
+    "event": "runtime_sample",
+    "boot_id": "9f41632b1a4345c1bdfdd3378ce3dfb1",
+    "uptime_seconds": 1800.04,
+    "rss_bytes": 109641728,
+    "task_count": 226,
+    "inflight_operations": 0,
+    "event_loop_lag_ms": 0.6,
+    "timestamp": "2026-09-08T09:43:18.289089769Z",
+    "instance": "srv-d9vekctg1s2s73fbr4l0-wtc8w"
+  },
+  "rss_mib_range": [
+    98.01,
+    104.56
+  ],
+  "operation_outcomes": {
+    "success": 4
+  },
+  "current_instances": [
+    {
+      "id": "srv-d9vekctg1s2s73fbr4l0-wtc8w",
+      "createdAt": "2026-09-08T09:12:55Z",
+      "status": "RUNNING",
+      "ready": true
+    }
+  ],
+  "latest_platform_memory": [
+    {
+      "instance": "srv-d9vekctg1s2s73fbr4l0-wtc8w",
+      "timestamp": "2026-09-08T09:43:27Z",
+      "mib": 117.56
+    }
+  ],
+  "passed": true
+}

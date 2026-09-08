@@ -33,12 +33,20 @@ def instance(series):
     return next((l["value"] for l in series["labels"] if l["field"] == "instance"), None)
 
 
-def evaluate_memory(usage, limits, now, warming_instances=()):
+def evaluate_memory(usage, limits, now, warming_instances=(), active_instances=None):
     findings = []
+    if active_instances is not None:
+        if not active_instances:
+            return [finding("telemetry", "Current instance inventory is empty")]
+        # Render retains metric series after an instance is deactivated. Those
+        # shrinking historical windows must not be treated as current telemetry.
+        usage = [s for s in usage if instance(s) in active_instances]
     fresh = [s for s in usage if s.get("values") and
              0 <= (now-timestamp(s["values"][-1]["timestamp"])).total_seconds() <= 900]
     if not fresh:
         return [finding("telemetry", "Memory samples missing or stale")]
+    if active_instances is not None and active_instances - {instance(s) for s in fresh}:
+        findings.append(finding("telemetry", "A current instance has missing or stale memory samples"))
     limit_by_instance = {instance(s): s for s in limits}
     for s in fresh:
         limit = limit_by_instance.get(instance(s))
@@ -213,6 +221,7 @@ def check_private(token, now):
     service = api_get("/services/"+SERVICE, token)
     if service.get("ownerId") != WORKSPACE:
         raise MonitoringError("Service workspace mismatch")
+    active_instances = {entry["id"] for entry in api_get("/services/"+SERVICE+"/instances", token)}
     params = {"resource": SERVICE, "startTime": iso(now-timedelta(minutes=20)),
               "endTime": iso(now), "resolutionSeconds": 60}
     usage = api_get("/metrics/memory", token, **params)
@@ -223,7 +232,7 @@ def check_private(token, now):
     findings, warming = classify_boots(boots, deploys, now)
     events = api_get("/services/"+SERVICE+"/events",token,limit=100)
     findings.extend(evaluate_platform_events(events,now))
-    findings.extend(evaluate_memory(usage, limits, now, warming))
+    findings.extend(evaluate_memory(usage, limits, now, warming, active_instances))
     requests = read_logs(token, now, 5, type="request")
     errors = sum(any(l["name"] == "statusCode" and l["value"].startswith("5") for l in r["labels"]) for r in requests)
     findings.extend(evaluate_http(errors, len(requests)))
