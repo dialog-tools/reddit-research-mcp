@@ -8,15 +8,22 @@ streamable HTTP, binding to the host/port the platform provides. The public
 """
 
 import os
+import uvicorn
 
 from src.server import mcp
 
 
 def main() -> None:
-    mcp.run(
-        transport="http",
+    # Keep the application lifespan inside Uvicorn's signal-handling scope.
+    # FastMCP 3.0's run_http_async opens an additional outer lifespan; Uvicorn
+    # re-raises SIGTERM before that outer context can close owned clients.
+    uvicorn.run(
+        mcp.http_app(),
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", "8000")),
+        lifespan="on",
+        ws="none",
+        timeout_graceful_shutdown=25,
     )
 
 

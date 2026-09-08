@@ -1,8 +1,44 @@
 import praw
 import os
 import logging
+import requests
+import time
+from src.blocking_io import WorkerBusy
 from pathlib import Path
 from dotenv import load_dotenv
+
+
+class BoundedSession(requests.Session):
+    """Apply finite connect/read timeouts even when PRAW supplies its default."""
+    def request(self, *args, **kwargs):
+        timeout = kwargs.get("timeout") or 10
+        kwargs["timeout"] = tuple(min(t or 10, 10) for t in timeout) if isinstance(timeout, tuple) else min(timeout, 10)
+        return super().request(*args, **kwargs)
+
+
+class OwnedReddit(praw.Reddit):
+    def __init__(self, **kwargs):
+        self.http_session = BoundedSession()
+        try:
+            super().__init__(requestor_kwargs={"session": self.http_session}, **kwargs)
+        except Exception:
+            self.http_session.close()
+            raise
+
+    def close(self):
+        self.http_session.close()
+
+    def request(self, *args, **kwargs):
+        # Check each PRAW request, including pages fetched inside one operation.
+        # This prevents the header-based limiter sleeping until an exhausted
+        # quota resets. Normal pacing is still handled by PRAW (at most 10s).
+        limits = self.auth.limits
+        if limits.get("remaining") is not None and limits["remaining"] <= 0 and (limits.get("reset_timestamp") or 0) > time.time():
+            raise WorkerBusy("Reddit rate limit exhausted; retry later")
+        return super().request(*args, **kwargs)
+
+    def __exit__(self, *_):
+        self.close()
 
 
 def enable_praw_debug_logging(level: int = logging.DEBUG):
@@ -56,12 +92,14 @@ def get_reddit_client() -> praw.Reddit:
         )
     
     # Create Reddit instance for read-only access
-    reddit = praw.Reddit(
+    reddit = OwnedReddit(
         client_id=client_id,
         client_secret=client_secret,
         user_agent=user_agent,
         redirect_uri="http://localhost:8080",  # Required even for read-only
-        ratelimit_seconds=300  # Auto-handle rate limits
+        ratelimit_seconds=0,
+        timeout=10,
+        check_for_updates=False,
     )
     
     # Explicitly enable read-only mode

@@ -1,0 +1,28 @@
+{
+  "container": "dialog-mcp-reliability-approved-gate",
+  "image": "sha256:5b603d66790001344d93c65b92195746c0aba36cb8ac313588f9fa755883b98b",
+  "started_at": "2026-09-08T07:09:14.044579755Z",
+  "memory_bytes": 536870912,
+  "memory_and_swap_bytes": 536870912,
+  "nano_cpus": 500000000,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "python",
+    "scripts/soak_http.py",
+    "--production-stack",
+    "--seconds",
+    "7200"
+  ],
+  "runtime": {
+    "python": "3.12.14",
+    "packages": {
+      "fastmcp": "3.0.0",
+      "mcp": "1.30.0",
+      "sse-starlette": "3.4.11",
+      "starlette": "0.49.3",
+      "psutil": "7.2.2"
+    }
+  }
+}

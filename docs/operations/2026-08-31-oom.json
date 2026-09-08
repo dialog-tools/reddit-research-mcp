@@ -1,0 +1,15 @@
+{
+  "details": {
+    "instanceID": "srv-d9vekctg1s2s73fbr4l0-5j5dl",
+    "reason": {
+      "evicted": false,
+      "oomKilled": {
+        "memoryLimit": "512Mi"
+      }
+    }
+  },
+  "id": "evt-daal54tbedkc73cc6gmg",
+  "serviceId": "srv-d9vekctg1s2s73fbr4l0",
+  "timestamp": "2026-08-31T10:08:19.218421Z",
+  "type": "server_failed"
+}

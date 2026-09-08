@@ -1,0 +1,25 @@
+name: Production public checks
+on:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      test_alert:
+        description: Send a labeled, intentional failure to verify notifications
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: production-public-checks
+  cancel-in-progress: false
+jobs:
+  public-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check_production.py --public-only ${{ inputs.test_alert && '--test-alert' || '' }}

@@ -27,6 +27,9 @@ class ChromaProxyClient:
         # Set API key in session headers if provided
         if self.api_key:
             self.session.headers['X-API-Key'] = self.api_key
+
+    def close(self):
+        self.session.close()
     
     def query(self, query_texts: List[str], n_results: int = 10, collection_name: str = "dialog-app-prod-db") -> Dict[str, Any]:
         """Query through proxy."""
@@ -107,6 +110,8 @@ def get_chroma_client():
 def reset_client_cache():
     """Reset the cached client instance (useful for testing)."""
     global _client_instance
+    if _client_instance is not None:
+        _client_instance.close()
     _client_instance = None
 
 
