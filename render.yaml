@@ -13,6 +13,7 @@ services:
     buildCommand: pip install uv && uv sync --frozen
     startCommand: uv run --no-sync reddit-mcp-http
     healthCheckPath: /health
+    maxShutdownDelaySeconds: 60
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION

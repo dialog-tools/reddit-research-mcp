@@ -53,14 +53,14 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 
 **Files:** Create `scripts/soak_http.py`, `tests/test_http_lifecycle.py`, and a baseline report under `docs/operations/`. Read `src/http_server.py`, `src/server.py`, `pyproject.toml`, and `uv.lock`.
 
-- [ ] After approval, confirm the working tree is clean, create the named branch, and record the production deploy ID, commit, package versions, transport settings, instance start time, and memory limit. Read only the specific runtime settings needed; do not dump environment variables.
-- [ ] Preserve the known-good deploy reference: `dep-dadkbv3l550s73c4902g`, commit `3a4935aaed74df02ba23a917b8b3d2bd7030fea1`; refresh if production has changed.
-- [ ] Check whether the local HTTP server is already healthy. Start a separate background test server on an available localhost port if needed, using synthetic auth and stub upstreams. Never reuse live credentials for a stress test.
-- [ ] Install the locked environment and dev extras with `uv sync --frozen --extra dev`; run `uv run --frozen pytest -q`. Record pre-existing failures separately from regressions.
-- [ ] Exercise real HTTP transport: initialize, initialized notification, tools/list, tools/call, resource read, graceful DELETE, dropped connections without DELETE, cancelled POSTs, and idle or abandoned GET streams. Include valid and invalid session IDs and unsuccessful initialization.
+- [x] After approval, confirm the working tree is clean, create the named branch, and record the production deploy ID, commit, package versions, transport settings, instance start time, and memory limit. Read only the specific runtime settings needed; do not dump environment variables.
+- [x] Preserve the known-good deploy reference: `dep-dadkbv3l550s73c4902g`, commit `3a4935aaed74df02ba23a917b8b3d2bd7030fea1`; refresh if production has changed.
+- [x] Check whether the local HTTP server is already healthy. Start a separate background test server on an available localhost port if needed, using synthetic auth and stub upstreams. Never reuse live credentials for a stress test.
+- [x] Install the locked environment and dev extras with `uv sync --frozen --extra dev`; run `uv run --frozen pytest -q`. Record pre-existing failures separately from regressions.
+- [x] Exercise real HTTP transport: initialize, initialized notification, tools/list, tools/call, resource read, graceful DELETE, dropped connections without DELETE, cancelled POSTs, and idle or abandoned GET streams. Include valid and invalid session IDs and unsuccessful initialization.
 - [ ] Measure current RSS, Python allocations using tracemalloc in the isolated test process, task counts, retained sessions, open file descriptors, and thread counts after equal batches and a fixed idle period. Include an idle control with only `/health` traffic.
-- [ ] Run at least ten batches of 100 sessions with upstreams stubbed, then repeat representative operations with controlled upstream delays. Keep baseline and candidate workloads identical.
-- [ ] Produce a causal report: which workload retains objects, what owns them, which termination paths release them, and whether retained Python objects explain RSS. Investigate native allocations separately if RSS grows without corresponding Python growth.
+- [x] Run at least ten batches of 100 sessions with upstreams stubbed, then repeat representative operations with controlled upstream delays. Keep baseline and candidate workloads identical.
+- [x] Produce a causal report: which workload retains objects, what owns them, which termination paths release them, and whether retained Python objects explain RSS. Investigate native allocations separately if RSS grows without corresponding Python growth.
 
 **Deliverable:** A repeatable failure or an explicit evidence gap with a bounded diagnostic deployment proposal. If reproduction fails, continue investigation; do not label a speculative dependency change as the fix.
 
@@ -71,10 +71,10 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 **Interface:** A lifespan-owned sampler emits `runtime_sample` structured logs once per minute with `uptime_seconds`, `rss_bytes`, `task_count`, `inflight_operations`, and `event_loop_lag_ms`. Add session counts only where the chosen SDK provides a stable mechanism; isolate any version-specific diagnostic adapter.
 
 - [ ] Test sampler startup, one sampler per process, stop/cancellation on shutdown, bounded storage, and omission of sensitive fields. Use a fake clock for unit tests.
-- [ ] Emit operation completion records with operation name, elapsed milliseconds, and a bounded outcome category: success, invalid_input, upstream_timeout, upstream_rate_limit, cancelled, or internal_error. Include application-level `success: false` results.
-- [ ] Keep `/health` inexpensive and free of network calls. Return 503 when required local initialization is incomplete or the process is draining; return 200 when the process can serve requests.
-- [ ] Keep dependency probes out of Render's frequent restart decision. An upstream outage should generate a dependency alert rather than force healthy MCP processes into a restart loop.
-- [ ] Test that mock upstream outages do not make the local liveness probe block, and that local initialization failure cannot report healthy.
+- [x] Emit operation completion records with operation name, elapsed milliseconds, and a bounded outcome category: success, invalid_input, upstream_timeout, upstream_rate_limit, cancelled, or internal_error. Include application-level `success: false` results.
+- [x] Keep `/health` inexpensive and free of network calls. Return 503 when required local initialization is incomplete or the process is draining; return 200 when the process can serve requests.
+- [x] Keep dependency probes out of Render's frequent restart decision. An upstream outage should generate a dependency alert rather than force healthy MCP processes into a restart loop.
+- [x] Test that mock upstream outages do not make the local liveness probe block, and that local initialization failure cannot report healthy.
 
 **Deliverable:** Production can reveal retained tasks and rising RSS without exposing a public diagnostic endpoint or adding another unbounded collection.
 
@@ -82,13 +82,13 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 
 **Files:** Modify `src/http_server.py`, lifespan wiring in `src/server.py`, and, when justified, `pyproject.toml`/`uv.lock`. Extend `tests/test_http_lifecycle.py` and `scripts/soak_http.py`. Modify `src/chroma_client.py` or client ownership only if lifecycle evidence calls for it.
 
-- [ ] Trace the retention path from Task 1 and compare compatible FastMCP/MCP releases against the reproducer. Choose and record the smallest compatible released version pair that fixes the demonstrated problem; preserve `fastmcp <4` unless a revised design is approved.
-- [ ] Prefer supported stateful cleanup. Idle expiry: the supported MCP 1.30.0 default of 30 minutes. FastMCP 3.0 does not expose configuration, so this repair keeps the default without production monkeypatching. Test the framework's exact definition of inactivity and handling of open GET streams; do not assume an idle-timeout setting cleans up every abandoned connection.
-- [ ] Verify explicit DELETE, disconnect, cancellation, failed initialization, and idle expiry release both transports and associated tasks. If explicit termination still leaves retained entries, an idle timer alone does not satisfy this task.
+- [x] Trace the retention path from Task 1 and compare compatible FastMCP/MCP releases against the reproducer. Choose and record the smallest compatible released version pair that fixes the demonstrated problem; preserve `fastmcp <4` unless a revised design is approved.
+- [x] Prefer supported stateful cleanup. Idle expiry: the supported MCP 1.30.0 default of 30 minutes. FastMCP 3.0 does not expose configuration, so this repair keeps the default without production monkeypatching. Test the framework's exact definition of inactivity and handling of open GET streams; do not assume an idle-timeout setting cleans up every abandoned connection.
+- [x] Verify explicit DELETE, disconnect, cancellation, failed initialization, and idle expiry release both transports and associated tasks. If explicit termination still leaves retained entries, an idle timer alone does not satisfy this task.
 - [ ] Verify active calls are not terminated by idle cleanup and clients recover correctly from an expired session. Test at least Claude Code, the Dialog agent's MCP client, and a representative Cursor connection.
-- [ ] Pair client creation and teardown. Close the Chroma HTTP session before replacing its cached client; close owned Reddit/HTTP clients and the diagnostic sampler during lifespan shutdown. Preserve stdio ownership and avoid double initialization.
-- [ ] Exercise SIGTERM with both live GET streams and in-flight operations. Bound draining to the platform grace period, close idle streams, and account explicitly for any cancelled calls. Verify no leaked-task shutdown warning under the representative test.
-- [ ] Rerun the exact baseline harness against the candidate and capture before/after allocation ownership and resource counts.
+- [x] Pair client creation and teardown. Close the Chroma HTTP session before replacing its cached client; close owned Reddit/HTTP clients and the diagnostic sampler during lifespan shutdown. Preserve stdio ownership and avoid double initialization.
+- [x] Exercise SIGTERM with both live GET streams and in-flight operations. Bound draining to the platform grace period, close idle streams, and account explicitly for any cancelled calls. Verify no leaked-task shutdown warning under the representative test.
+- [x] Rerun the exact baseline harness against the candidate and capture before/after allocation ownership and resource counts.
 
 **Deliverable:** A regression test fails on the baseline and passes on the chosen fix. Exact package changes and release evidence are included in the PR. Do not implement a custom session garbage collector by editing SDK private dictionaries.
 
@@ -98,13 +98,13 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 
 **Design:** Use a bounded, lifespan-owned worker for synchronous Reddit access and a separate bounded worker for Chroma access. Each upstream's synchronous client is owned by its worker; never use one requests/PRAW session concurrently across threads. Preserve progress notifications on the event loop. Fully materialize lazy upstream responses in the worker before returning plain data.
 
-- [ ] Write an HTTP test with an upstream stub that waits 10 seconds; concurrently issue 20 health requests. Demonstrate the baseline stall and require candidate health responses to finish within 1 second in the controlled local test.
-- [ ] Cover all five Reddit/vector operations, not just the synchronous dispatch branch. Keep async feed HTTP operations async and preserve their existing response contracts.
-- [ ] Start with one worker per upstream and at most 16 queued operations per worker. Reject excess work promptly with a structured retryable busy result; test no hidden executor queue grows past that bound.
-- [ ] Configure finite upstream request timeouts and bounded retries. Preserve Chroma's existing timeout bounds; explicitly test PRAW's rate-limit waiting behavior instead of allowing its current 300-second wait to monopolize the worker indefinitely.
-- [ ] Treat thread cancellation honestly: cancelling the awaiting coroutine does not kill a running network call. Keep its capacity occupied until the worker exits, discard late output, and rely on bounded upstream I/O. Verify shutdown behavior for that case.
-- [ ] Pass progress information back through bounded messages, invoke `ctx.report_progress` on the event loop, and test ordering, completion, cancellation, and error propagation.
-- [ ] Confirm response schemas and result limits are unchanged. This task does not include a general AsyncPRAW migration or a rewrite of feed persistence.
+- [x] Write an HTTP test with an upstream stub that waits 10 seconds; concurrently issue 20 health requests. Demonstrate the baseline stall and require candidate health responses to finish within 1 second in the controlled local test.
+- [x] Cover all five Reddit/vector operations, not just the synchronous dispatch branch. Keep async feed HTTP operations async and preserve their existing response contracts.
+- [x] Start with one worker per upstream and at most 16 queued operations per worker. Reject excess work promptly with a structured retryable busy result; test no hidden executor queue grows past that bound.
+- [x] Configure finite upstream request timeouts and bounded retries. Preserve Chroma's existing timeout bounds; explicitly test PRAW's rate-limit waiting behavior instead of allowing its current 300-second wait to monopolize the worker indefinitely.
+- [x] Treat thread cancellation honestly: cancelling the awaiting coroutine does not kill a running network call. Keep its capacity occupied until the worker exits, discard late output, and rely on bounded upstream I/O. Verify shutdown behavior for that case.
+- [x] Pass progress information back through bounded messages, invoke `ctx.report_progress` on the event loop, and test ordering, completion, cancellation, and error propagation.
+- [x] Confirm response schemas and result limits are unchanged. This task does not include a general AsyncPRAW migration or a rewrite of feed persistence.
 
 **Deliverable:** Slow or rate-limited upstreams produce bounded failures while `/health`, authentication, and unrelated MCP operations remain responsive.
 
@@ -112,10 +112,10 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 
 **Files:** Modify `src/server.py` and `tests/test_http_server.py`.
 
-- [ ] Add a failing parameterized test for both public metadata paths returning 200 and the same JSON document. Test localhost and configured hosted `SERVER_URL` values, including trailing slashes.
-- [ ] Register `/.well-known/oauth-protected-resource` alongside `/.well-known/oauth-protected-resource/mcp`, sharing the existing response implementation.
-- [ ] Preserve the `/mcp` resource identity, Descope authorization-server URL, and bearer challenge. Check framework/custom route precedence so neither path shadows the wrong response.
-- [ ] Test unauthenticated MCP access remains 401; both supported issuer formats still authenticate; invalid, expired, and incorrectly signed tokens remain rejected. Use synthetic signing keys and local JWKS fixtures.
+- [x] Add a failing parameterized test for both public metadata paths returning 200 and the same JSON document. Test localhost and configured hosted `SERVER_URL` values, including trailing slashes.
+- [x] Register `/.well-known/oauth-protected-resource` alongside `/.well-known/oauth-protected-resource/mcp`, sharing the existing response implementation.
+- [x] Preserve the `/mcp` resource identity, Descope authorization-server URL, and bearer challenge. Check framework/custom route precedence so neither path shadows the wrong response.
+- [x] Test unauthenticated MCP access remains 401; both supported issuer formats still authenticate; invalid, expired, and incorrectly signed tokens remain rejected. Use synthetic signing keys and local JWKS fixtures.
 - [ ] Verify the canonical and legacy hosts advertise their own configured resource identities after deployment.
 
 **Deliverable:** Compatible public discovery at both paths with authentication behavior preserved.
@@ -136,10 +136,10 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 | Tool failures inside HTTP 200 | Alert on at least 5 internal/upstream-timeout outcomes in 5 minutes; exclude invalid input and expected auth challenges |
 | Missing telemetry | No fresh metric samples within 15 minutes, missing expected runtime samples, or checker/API failure |
 
-- [ ] Parse actual Render API responses into pure threshold-evaluation functions; test exact boundary values, multiple instances during deployment, stale data, absent series, and a valid zero-error interval. Pin resource/workspace IDs in configuration.
-- [ ] Use current usage divided by current limit per instance; never add both deployment instances' memory and compare against one instance's limit. Use request logs where the coarse metric discrepancy would affect an alert.
-- [ ] Read bounded log windows for boot records, application outcomes, and missing runtime samples. Apply timeouts and pagination limits; incomplete data marks monitoring incomplete.
-- [ ] Store the monitor's Render credential only as a service secret. Use read-only/scoped credentials where supported; if Render offers only a broader API key, disclose the effective scope before provisioning it and give the checker code no mutation path.
+- [x] Parse actual Render API responses into pure threshold-evaluation functions; test exact boundary values, multiple instances during deployment, stale data, absent series, and a valid zero-error interval. Pin resource/workspace IDs in configuration.
+- [x] Use current usage divided by current limit per instance; never add both deployment instances' memory and compare against one instance's limit. Use request logs where the coarse metric discrepancy would affect an alert.
+- [x] Read bounded log windows for boot records, application outcomes, and missing runtime samples. Apply timeouts and pagination limits; incomplete data marks monitoring incomplete.
+- [x] Store the monitor's Render credential only as a service secret. Use read-only/scoped credentials where supported; if Render offers only a broader API key, disclose the effective scope before provisioning it and give the checker code no mutation path.
 - [ ] Configure service-level failure notifications to Chris's existing Render email destination. Threshold breaches cause the cron job to fail with a concise diagnostic summary, invoking Render's failure notification path. Initially allow repeated alerts while a condition persists; document observed delivery and repeat behavior instead of assuming deduplication.
 - [ ] Add a credential-free GitHub Actions check of public health and metadata every five minutes, offset from the hour, as an independent platform-outage signal. Configure failure notifications for Chris and verify delivery. This is supplementary: GitHub scheduling can be delayed/dropped and public-repo schedules can disable after 60 days of inactivity.
 - [ ] Use the authenticated connector for read-only post-deploy and daily soak smoke checks: discovery, one fetched post, resource read, and a feed-list read where available. Do not store a personal connector token in a public-repo scheduled workflow. Durable unattended authenticated synthetic testing needs a dedicated renewable monitor identity and is a separate follow-up if no suitable identity exists.
@@ -154,12 +154,12 @@ Sources: [Render notifications](https://render.com/docs/notifications), [cron jo
 
 **Files:** Create `.github/workflows/test.yml`; update the operational runbook and baseline/candidate reports.
 
-- [ ] Run PR tests on Python 3.11 and 3.12 using locked dev dependencies and synthetic auth/upstreams. Include HTTP lifecycle, responsiveness, OAuth, monitoring, and existing operation tests. No production secrets in PR jobs.
-- [ ] Run `uv run --frozen pytest -q` and `uv build`; verify both console entrypoints from the resulting package.
+- [x] Run PR tests on Python 3.11 and 3.12 using locked dev dependencies and synthetic auth/upstreams. Include HTTP lifecycle, responsiveness, OAuth, monitoring, and existing operation tests. No production secrets in PR jobs.
+- [x] Run `uv run --frozen pytest -q` and `uv build`; verify both console entrypoints from the resulting package.
 - [ ] Run a two-hour, 512 MiB-limited candidate soak with steady work and repeated session churn. Use short test-only expiry intervals for deterministic cleanup checks, and separately verify the production idle timeout configuration.
 - [ ] Require no monotonic growth in retained sessions/tasks/file descriptors after cleanup, no OOM, and post-warmup RSS growth below 10 MiB/hour. Compare allocation snapshots and equal-work batches; this short soak is only a predeployment gate, not final proof.
 - [ ] Confirm p95 health latency below 1 second under simulated slow upstream calls and no material regression in representative operation latency or throughput against the same baseline workload.
-- [ ] Review the final diff for auth compatibility, cancellation semantics, queue bounds, package changes, and rollbackability. Present test results in the PR. If any baseline failure remains, resolve it or explicitly revise the gate before merging.
+- [x] Review the final diff for auth compatibility, cancellation semantics, queue bounds, package changes, and rollbackability. Present test results in the PR. If any baseline failure remains, resolve it or explicitly revise the gate before merging.
 
 **Deliverable:** One focused PR containing independently reviewable commits for diagnostics/cleanup, responsiveness, OAuth, and monitoring. Preserve the unrelated package-publishing workflow.
 

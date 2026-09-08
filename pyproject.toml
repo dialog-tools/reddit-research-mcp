@@ -21,7 +21,7 @@ classifiers = [
 dependencies = [
     "aiohttp>=3.12.15",
     "praw>=7.7.1",
-    "fastmcp>=3.0.0,<4",
+    "fastmcp==3.0.0",
     "mcp>=1.30.0,<2",
     "httpx>=0.27.0",
     "openai-agents>=0.2.8",

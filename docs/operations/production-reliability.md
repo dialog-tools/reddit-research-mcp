@@ -2,6 +2,8 @@
 
 Status: implementation and release validation in progress. Production rollout,
 alert delivery verification, and the seven-day stability window remain pending.
+The monitor has been provisioned on the smallest plan with recurring checks
+held until rollout. Its labeled failure test completed; email receipt is pending.
 Chris is the operational owner and receives alerts through his existing Render
 account email destination.
 
@@ -17,16 +19,22 @@ account email destination.
 | Previous known-good deploy | `dep-dadkbv3l550s73c4902g` |
 | Previous commit | `3a4935aaed74df02ba23a917b8b3d2bd7030fea1` |
 | Legacy host | https://reddit-research-mcp.fastmcp.app/mcp |
-| Monitor | `reddit-mcp-reliability-monitor` (provisioning pending) |
+| Monitor | `reddit-mcp-reliability-monitor`, `crn-dafrbr8n74is73baeqq0` |
 
-Both hosted deployments follow `main`. A merge may deploy both. Avoid manually
+Both hosted deployments follow `main`. The legacy dashboard was not authenticated
+in this session; its live runtime/build settings could not be inspected. Its
+public health and host-specific metadata were verified, and all 115 tests also
+passed in a clean install using the exact FastMCP pin with otherwise latest
+dependencies (including PRAW 8.0.3 and Starlette 1.6.0). A merge may deploy both. Avoid manually
 triggering a second Render deploy after auto-deploy starts. This remains a
 single-instance service; long-lived client sessions can need reinitialization
 during a deployment.
 
 ## What the repair changes
 
-- FastMCP stays at **3.0.0**. MCP SDK moves from **1.24.0 to 1.30.0**.
+- FastMCP is pinned to **3.0.0**. An unlocked install selected 3.4.7 and
+  broke both accepted token formats because its JWT interface changed. The
+  exact pin preserves the tested auth interface even when a host ignores the lockfile. MCP SDK moves from **1.24.0 to 1.30.0**.
   The SDK now discards terminated/failed sessions and expires abandoned sessions
   after its supported **30-minute default**. Active POSTs and open GET streams
   pause expiry. FastMCP 3.0 does not expose a configurable SDK idle timeout; this
@@ -35,6 +43,8 @@ during a deployment.
   The old SSE shutdown watcher did not close established streams on SIGTERM.
   The new watcher is bounded to one per event loop. HTTP draining allows 25
   seconds, followed by concurrent worker draining for up to 26 seconds.
+  Set Render's `maxShutdownDelaySeconds` to 60 at rollout to accommodate both
+  phases; the previous platform default is 30 seconds. Restore 30 on rollback.
   The Render entrypoint serves `mcp.http_app()` directly through Uvicorn so its
   lifespan exits before Uvicorn re-raises SIGTERM; FastMCP 3.0's extra outer
   lifespan otherwise skips application cleanup on this path.
@@ -124,6 +134,7 @@ would be about $2.15 of compute over 31 days. Check actual usage after provision
 Sources: [Render cron jobs](https://render.com/docs/cronjobs),
 [Render pricing](https://render.com/pricing),
 [Render notifications](https://render.com/docs/notifications),
+[Render shutdown configuration](https://render.com/docs/blueprint-spec),
 [GitHub scheduling limitations](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
 
 ## Diagnostics without request contents
@@ -185,7 +196,7 @@ authenticated checks until a renewable monitoring identity exists.
 | Checkpoint | Evidence/status |
 | --- | --- |
 | Deployment and first 30 minutes | Pending |
-| Render labeled alert receipt | Pending |
+| Render labeled alert receipt | Test run `crn-dafrbr8n74is73baeqq0-1788851754` emitted the labeled failure at 2026-09-08 07:16 UTC; receipt confirmation pending |
 | GitHub labeled alert receipt | Pending |
 | 1 hour | Pending |
 | 24 hours | Pending |
