@@ -35,3 +35,19 @@ services:
         sync: false
       - key: CHROMA_PROXY_API_KEY
         sync: false
+  - type: cron
+    name: reddit-mcp-reliability-monitor
+    runtime: python
+    repo: https://github.com/dialog-tools/reddit-research-mcp
+    branch: main
+    region: oregon
+    plan: 0.5c-512mb
+    schedule: '*/5 * * * *'
+    buildCommand: python --version
+    startCommand: python scripts/check_production.py
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: RENDER_API_KEY
+        sync: false
