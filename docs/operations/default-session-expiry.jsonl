@@ -1,0 +1,2 @@
+{"event": "started", "sdk_default_seconds": 1800, "sessions": 1}
+{"event": "passed", "elapsed_seconds": 1805.17, "sessions_after_expiry": 0, "expired_session_status": 404, "reinitialized": true}

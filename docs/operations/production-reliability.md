@@ -1,6 +1,6 @@
 # Production reliability runbook
 
-Status: implementation and release validation in progress. Production rollout,
+Status: implementation, 119-test CI, and the two-hour release soak passed. Production rollout,
 alert delivery verification, and the seven-day stability window remain pending.
 The monitor has been provisioned on the smallest plan with recurring checks
 held until rollout. Its labeled failure test completed; email receipt is pending.

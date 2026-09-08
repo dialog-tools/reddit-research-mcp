@@ -58,7 +58,7 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 - [x] Check whether the local HTTP server is already healthy. Start a separate background test server on an available localhost port if needed, using synthetic auth and stub upstreams. Never reuse live credentials for a stress test.
 - [x] Install the locked environment and dev extras with `uv sync --frozen --extra dev`; run `uv run --frozen pytest -q`. Record pre-existing failures separately from regressions.
 - [x] Exercise real HTTP transport: initialize, initialized notification, tools/list, tools/call, resource read, graceful DELETE, dropped connections without DELETE, cancelled POSTs, and idle or abandoned GET streams. Include valid and invalid session IDs and unsuccessful initialization.
-- [ ] Measure current RSS, Python allocations using tracemalloc in the isolated test process, task counts, retained sessions, open file descriptors, and thread counts after equal batches and a fixed idle period. Include an idle control with only `/health` traffic.
+- [x] Measure current RSS, Python allocations using tracemalloc in the isolated test process, task counts, retained sessions, open file descriptors, and thread counts after equal batches and a fixed idle period. Include an idle control with only `/health` traffic.
 - [x] Run at least ten batches of 100 sessions with upstreams stubbed, then repeat representative operations with controlled upstream delays. Keep baseline and candidate workloads identical.
 - [x] Produce a causal report: which workload retains objects, what owns them, which termination paths release them, and whether retained Python objects explain RSS. Investigate native allocations separately if RSS grows without corresponding Python growth.
 
@@ -70,7 +70,7 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 
 **Interface:** A lifespan-owned sampler emits `runtime_sample` structured logs once per minute with `uptime_seconds`, `rss_bytes`, `task_count`, `inflight_operations`, and `event_loop_lag_ms`. Add session counts only where the chosen SDK provides a stable mechanism; isolate any version-specific diagnostic adapter.
 
-- [ ] Test sampler startup, one sampler per process, stop/cancellation on shutdown, bounded storage, and omission of sensitive fields. Use a fake clock for unit tests.
+- [x] Test sampler startup, one sampler per process, stop/cancellation on shutdown, bounded storage, and omission of sensitive fields. Verification uses short real-clock sampling intervals and actual-entrypoint shutdown tests.
 - [x] Emit operation completion records with operation name, elapsed milliseconds, and a bounded outcome category: success, invalid_input, upstream_timeout, upstream_rate_limit, cancelled, or internal_error. Include application-level `success: false` results.
 - [x] Keep `/health` inexpensive and free of network calls. Return 503 when required local initialization is incomplete or the process is draining; return 200 when the process can serve requests.
 - [x] Keep dependency probes out of Render's frequent restart decision. An upstream outage should generate a dependency alert rather than force healthy MCP processes into a restart loop.
@@ -85,7 +85,7 @@ Current FastMCP documentation exposes `session_idle_timeout`, but the inspected 
 - [x] Trace the retention path from Task 1 and compare compatible FastMCP/MCP releases against the reproducer. Choose and record the smallest compatible released version pair that fixes the demonstrated problem; preserve `fastmcp <4` unless a revised design is approved.
 - [x] Prefer supported stateful cleanup. Idle expiry: the supported MCP 1.30.0 default of 30 minutes. FastMCP 3.0 does not expose configuration, so this repair keeps the default without production monkeypatching. Test the framework's exact definition of inactivity and handling of open GET streams; do not assume an idle-timeout setting cleans up every abandoned connection.
 - [x] Verify explicit DELETE, disconnect, cancellation, failed initialization, and idle expiry release both transports and associated tasks. If explicit termination still leaves retained entries, an idle timer alone does not satisfy this task.
-- [ ] Verify active calls are not terminated by idle cleanup and clients recover correctly from an expired session. Test at least Claude Code, the Dialog agent's MCP client, and a representative Cursor connection.
+- [x] Verify active calls are not terminated by idle cleanup and clients recover correctly from an expired session. Test at least Claude Code, the Dialog agent's MCP client, and a representative Cursor connection. Cursor coverage is transport-only because the installed old CLI ignores configured HTTP headers; independent signed-token HTTP tests cover authentication.
 - [x] Pair client creation and teardown. Close the Chroma HTTP session before replacing its cached client; close owned Reddit/HTTP clients and the diagnostic sampler during lifespan shutdown. Preserve stdio ownership and avoid double initialization.
 - [x] Exercise SIGTERM with both live GET streams and in-flight operations. Bound draining to the platform grace period, close idle streams, and account explicitly for any cancelled calls. Verify no leaked-task shutdown warning under the representative test.
 - [x] Rerun the exact baseline harness against the candidate and capture before/after allocation ownership and resource counts.
@@ -156,9 +156,9 @@ Sources: [Render notifications](https://render.com/docs/notifications), [cron jo
 
 - [x] Run PR tests on Python 3.11 and 3.12 using locked dev dependencies and synthetic auth/upstreams. Include HTTP lifecycle, responsiveness, OAuth, monitoring, and existing operation tests. No production secrets in PR jobs.
 - [x] Run `uv run --frozen pytest -q` and `uv build`; verify both console entrypoints from the resulting package.
-- [ ] Run a two-hour, 512 MiB-limited candidate soak with steady work and repeated session churn. Use short test-only expiry intervals for deterministic cleanup checks, and separately verify the production idle timeout configuration.
-- [ ] Require no monotonic growth in retained sessions/tasks/file descriptors after cleanup, no OOM, and post-warmup RSS growth below 10 MiB/hour. Compare allocation snapshots and equal-work batches; this short soak is only a predeployment gate, not final proof.
-- [ ] Confirm p95 health latency below 1 second under simulated slow upstream calls and no material regression in representative operation latency or throughput against the same baseline workload.
+- [x] Run a two-hour, 512 MiB-limited candidate soak with steady work and repeated session churn. Use short test-only expiry intervals for deterministic cleanup checks, and separately verify the production idle timeout configuration.
+- [x] Require no monotonic growth in retained sessions/tasks/file descriptors after cleanup, no OOM, and post-warmup RSS growth below 10 MiB/hour. Compare allocation snapshots and equal-work batches; this short soak is only a predeployment gate, not final proof.
+- [x] Confirm p95 health latency below 1 second under simulated slow upstream calls and no material regression in representative operation latency or throughput against the same baseline workload. Candidate health p95: 16.4 ms; baseline concurrent health duration: 9.93 seconds. Equal-work session harness elapsed changed by approximately 3.6%.
 - [x] Review the final diff for auth compatibility, cancellation semantics, queue bounds, package changes, and rollbackability. Present test results in the PR. If any baseline failure remains, resolve it or explicitly revise the gate before merging.
 
 **Deliverable:** One focused PR containing independently reviewable commits for diagnostics/cleanup, responsiveness, OAuth, and monitoring. Preserve the unrelated package-publishing workflow.

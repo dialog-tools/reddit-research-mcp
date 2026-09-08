@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "reasons": [],
+  "duration_seconds": 7201.57,
+  "batches": 320,
+  "rss_mib_min": 122.44,
+  "rss_mib_max": 122.44,
+  "rss_mib_per_hour": 0.0,
+  "post_warmup_counts": {
+    "sessions": [
+      0
+    ],
+    "tasks": [
+      7
+    ],
+    "threads": [
+      5
+    ],
+    "file_descriptors": [
+      10
+    ]
+  },
+  "container_exit_code": 0,
+  "oom_killed": false,
+  "finished_at": "2026-09-08T09:09:23.111080341Z"
+}

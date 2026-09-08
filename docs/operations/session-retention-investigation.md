@@ -101,6 +101,10 @@ locked version. Only tests shorten SDK expiry; production uses its public defaul
 - HTTP tests cover explicit DELETE, abandoned sessions, disconnected POSTs,
   active calls and GET streams, invalid initialization/session IDs, idle expiry,
   reinitialization, and configured canonical/legacy metadata identities.
+- A separate real-time check used the unmodified SDK default of 1,800 seconds.
+  After 1,805 seconds, the abandoned session count was zero, reuse returned 404,
+  and a freshly initialized session successfully listed tools. The process
+  exited successfully; see `default-session-expiry.jsonl`.
 
 The separate ten-minute idle control completed with exit zero/no OOM, zero
 sessions, six tasks, four threads, and ten file descriptors throughout. RSS
@@ -114,12 +118,19 @@ reads. Only external Reddit/Chroma calls are stubbed. Every batch mixes explicit
 DELETE with abandoned sessions, then measures sessions, tasks, threads, open
 file descriptors, Python allocations, and RSS after cleanup.
 
-The Python 3.11 and 3.12 GitHub matrix passed all 115 tests and package builds
-([CI run](https://github.com/dialog-tools/reddit-research-mcp/actions/runs/34198364147)).
-The two-hour result is pending. The exact FastMCP constraint was added after
-the soak started; application source and every resolved runtime package remain
-identical to the running container. Render's 60-second shutdown setting is a
-platform rollout setting, not a change to the soak workload. Use `scripts/analyze_soak.py` on the completed
-JSONL observations and independently check the container's exit/OOM status.
-Earlier short exploratory soaks are not substitutes for this gate. Production
-rollout and the seven-day stability window remain pending.
+The Python 3.11 and 3.12 GitHub matrix passed all 119 tests and package builds
+([CI run](https://github.com/dialog-tools/reddit-research-mcp/actions/runs/34201560069)).
+The two-hour gate passed: 7,201.57 seconds and 320 batches, with zero retained
+sessions, seven tasks, five threads, and ten file descriptors after cleanup.
+Post-warmup RSS stayed at 122.44 MiB, with a measured slope of 0 MiB/hour.
+The container exited zero and was not OOM-killed. Raw observations, automated
+analysis, and exact container/runtime settings are preserved in
+`production-stack-soak.jsonl`, `production-stack-soak-result.json`, and
+`soak-container-manifest.json`.
+
+The exact FastMCP constraint was added after the soak started; all 17 application
+source files and every resolved runtime package remained identical to the
+running container. Render's 60-second shutdown allowance is a platform rollout
+setting. The container used Python 3.12.14; production retains its configured
+Python 3.12.7. Earlier short exploratory soaks were not used to satisfy this gate.
+Production rollout and the seven-day stability window remain pending.
