@@ -1,0 +1,11 @@
+**
+!Dockerfile.reliability
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+!src/**/*.py
+!tests/
+!tests/**/*.py
+!scripts/
+!scripts/**/*.py

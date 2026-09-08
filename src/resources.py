@@ -1,20 +1,20 @@
 """Reddit MCP Resources - Server information endpoint."""
 
-from typing import Dict, Any
-import praw
+import json
 
 
-def register_resources(mcp, reddit: praw.Reddit) -> None:
+def register_resources(mcp, reddit_provider) -> None:
     """Register server info resource with the MCP server."""
     
-    @mcp.resource("reddit://server-info")
-    def get_server_info() -> Dict[str, Any]:
+    @mcp.resource("reddit://server-info", mime_type="application/json")
+    def get_server_info() -> str:
         """
         Get comprehensive information about the Reddit MCP server's capabilities.
         
         Returns server version, available tools, prompts, and usage examples.
         """
-        # Try to get rate limit info from Reddit
+        reddit = reddit_provider() if callable(reddit_provider) else reddit_provider
+        # Rate limit information is cached; never makes an upstream request.
         rate_limit_info = {}
         try:
             # Access auth to check rate limit status
@@ -29,7 +29,7 @@ def register_resources(mcp, reddit: praw.Reddit) -> None:
                 "strategy": "Automatic retry with exponential backoff"
             }
         
-        return {
+        return json.dumps({
             "name": "Reddit Research MCP Server",
             "version": "0.4.0",
             "description": "MCP server for comprehensive Reddit research with semantic search across 20,000+ indexed subreddits",
@@ -229,4 +229,4 @@ def register_resources(mcp, reddit: praw.Reddit) -> None:
                 "issues": "https://github.com/king-of-the-grackles/reddit-research-mcp/issues",
                 "documentation": "See README.md and specs/ directory for architecture details"
             }
-        }
+        })

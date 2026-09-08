@@ -32,6 +32,36 @@ from src.tools.feed import (
     delete_feed,
 )
 from src.resources import register_resources
+import asyncio
+import time
+from contextlib import asynccontextmanager
+from src.blocking_io import upstream_workers, WorkerBusy, ProgressContext
+from src.observability import RuntimeMetrics
+from src.chroma_client import reset_client_cache
+
+reddit = None
+runtime_metrics = None
+
+
+@asynccontextmanager
+async def server_lifespan(server):
+    global reddit, runtime_metrics
+    reddit = None
+    runtime_metrics = RuntimeMetrics()
+    async with upstream_workers() as (reddit_worker, chroma_worker):
+        chroma_worker.cleanup = reset_client_cache
+        async with runtime_metrics.sampling():
+            try:
+                reddit = await reddit_worker.call(get_reddit_client)
+                reddit_worker.cleanup = lambda client=reddit: client.__exit__(None, None, None)
+                runtime_metrics.ready = True
+            except Exception:
+                runtime_metrics.emit("initialization_failed", component="reddit")
+            try:
+                yield {"reddit_worker": reddit_worker, "chroma_worker": chroma_worker,
+                       "metrics": runtime_metrics}
+            finally:
+                runtime_metrics.ready = False
 
 # Configure Descope authentication with multi-issuer support
 # This allows the server to accept both:
@@ -60,7 +90,7 @@ auth = DescopeProvider(
 )
 
 # Initialize MCP server with authentication
-mcp = FastMCP("Reddit MCP", auth=auth, instructions="""
+mcp = FastMCP("Reddit MCP", auth=auth, lifespan=server_lifespan, instructions="""
 Reddit MCP Server - Three-Layer Architecture
 
 🎯 ALWAYS FOLLOW THIS WORKFLOW:
@@ -93,6 +123,8 @@ async def health_check(request) -> Response:
     Allows clients to verify the server is running before attempting OAuth.
     """
     try:
+        if runtime_metrics is None or not runtime_metrics.ready:
+            return JSONResponse({"status": "unavailable"}, status_code=503)
         return JSONResponse({
             "status": "ok",
             "server": "Reddit MCP",
@@ -231,6 +263,7 @@ async def mcp_config(request) -> Response:
 # origin. Production now runs on Render (mcp.dialog.tools) where the framework
 # route works, but the legacy fastmcp.app deployment still auto-deploys from
 # main, so keep this until that deployment is retired.
+@mcp.custom_route("/.well-known/oauth-protected-resource", methods=["GET"])
 @mcp.custom_route("/.well-known/oauth-protected-resource/mcp", methods=["GET"])
 async def oauth_protected_resource(request) -> Response:
     server_base_url = os.getenv("SERVER_URL", "http://localhost:8000").rstrip("/")
@@ -244,22 +277,7 @@ async def oauth_protected_resource(request) -> Response:
     })
 
 
-# Initialize Reddit client (will be updated with config when available)
-reddit = None
-
-
-def initialize_reddit_client():
-    """Initialize Reddit client with environment config."""
-    global reddit
-    reddit = get_reddit_client()
-    # Register resources with the new client
-    register_resources(mcp, reddit)
-
-# Initialize with environment variables initially
-try:
-    initialize_reddit_client()
-except Exception as e:
-    print(f"DEBUG: Reddit init failed: {e}", flush=True)
+register_resources(mcp, lambda: reddit)
 
 
 # Three-Layer Architecture Implementation
@@ -751,6 +769,12 @@ async def execute_operation(
             "available_operations": list(operations.keys())
         }
 
+    state = ctx.lifespan_context if ctx is not None else {}
+    metrics = state.get("metrics")
+    started = time.monotonic()
+    outcome = "internal_error"
+    if metrics:
+        metrics.inflight_operations += 1
     try:
         # Add reddit client and context to params for operations that need them
         if operation_id in ["search_subreddit", "fetch_posts", "fetch_multiple", "fetch_comments"]:
@@ -764,13 +788,30 @@ async def execute_operation(
             "create_feed", "list_feeds",
             "get_feed", "get_feed_config", "update_feed", "delete_feed"
         ]
-        if operation_id in async_operations:
+        blocking_operations = {"discover_subreddits", "fetch_posts", "search_subreddit",
+                               "fetch_multiple", "fetch_comments"}
+        if operation_id in blocking_operations and state:
+            worker = state["chroma_worker" if operation_id == "discover_subreddits" else "reddit_worker"]
+            params["ctx"] = ProgressContext(ctx, asyncio.get_running_loop()) if ctx else None
+            def invoke():
+                if operation_id != "discover_subreddits" and reddit is not None:
+                    limits = reddit.auth.limits
+                    if limits.get("remaining") is not None and limits["remaining"] <= 0 and (limits.get("reset_timestamp") or 0) > time.time():
+                        raise WorkerBusy("Reddit rate limit exhausted")
+                return operations[operation_id](**params)
+            result = await worker.call(invoke)
+        elif operation_id in async_operations:
             result = await operations[operation_id](**params)
         else:
             result = operations[operation_id](**params)
 
         # Check if result indicates an error (feed operations return {"error": "..."} on failure)
         if isinstance(result, dict) and "error" in result:
+            status = result.get("status_code")
+            text = str(result.get("error", "")).lower()
+            outcome = ("upstream_rate_limit" if status == 429 or "rate limit" in text else
+                       "upstream_timeout" if "timeout" in text or "timed out" in text else
+                       "invalid_input" if status in (400, 403, 404) or "invalid" in text else "internal_error")
             return {
                 "success": False,
                 "error": result.get("error"),
@@ -778,17 +819,35 @@ async def execute_operation(
                 "data": result
             }
 
+        outcome = "success"
         return {
             "success": True,
             "data": result
         }
         
+    except WorkerBusy:
+        outcome = "upstream_rate_limit"
+        return {"success": False, "error": "Upstream busy; retry later", "retryable": True}
+    except asyncio.CancelledError:
+        outcome = "cancelled"
+        raise
     except Exception as e:
+        error_text = str(e).lower()
+        if "timeout" in error_text or "timed out" in error_text:
+            outcome = "upstream_timeout"
+        elif "rate limit" in error_text:
+            outcome = "upstream_rate_limit"
+        elif isinstance(e, TypeError):
+            outcome = "invalid_input"
         return {
             "success": False,
             "error": str(e),
             "recovery": suggest_recovery(operation_id, e)
         }
+    finally:
+        if metrics:
+            metrics.inflight_operations -= 1
+            metrics.record_operation(operation_id, time.monotonic()-started, outcome)
 
 
 def suggest_recovery(operation_id: str, error: Exception) -> str:
@@ -949,18 +1008,7 @@ def reddit_research(research_request: str) -> List[Message]:
 
 def main():
     """Main entry point for the server."""
-    print("Reddit MCP Server starting...", flush=True)
-    
-    # Try to initialize the Reddit client with available configuration
-    try:
-        initialize_reddit_client()
-        print("Reddit client initialized successfully", flush=True)
-    except Exception as e:
-        print(f"WARNING: Failed to initialize Reddit client: {e}", flush=True)
-        print("Server will run with limited functionality.", flush=True)
-        print("\nPlease provide Reddit API credentials via:", flush=True)
-        print("  1. Environment variables: REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT", flush=True)
-        print("  2. Config file: .mcp-config.json", flush=True)
+    print("Reddit MCP Server starting...", file=sys.stderr, flush=True)
     
     # Run with stdio transport
     mcp.run()

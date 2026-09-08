@@ -22,6 +22,7 @@ dependencies = [
     "aiohttp>=3.12.15",
     "praw>=7.7.1",
     "fastmcp>=3.0.0,<4",
+    "mcp>=1.30.0,<2",
     "httpx>=0.27.0",
     "openai-agents>=0.2.8",
     "pydantic>=2.0.0",
@@ -29,6 +30,8 @@ dependencies = [
     "starlette>=0.32.0",
     "uvicorn>=0.30.0",
     "requests>=2.31.0",
+    "psutil>=7,<8",
+    "sse-starlette>=3.4.11,<4",
 ]
 
 [project.urls]
@@ -59,5 +62,6 @@ allow-direct-references = true
 packages = ["src"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
