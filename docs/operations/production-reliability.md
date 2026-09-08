@@ -88,6 +88,7 @@ network request to ten seconds, and exits by 85 seconds.
 | HTTP failures | At least five 5xx in five minutes, or over 1% with at least 100 requests |
 | Tool failures inside HTTP 200 | At least five internal-error/upstream-timeout outcomes in five minutes |
 | Restarts | Unexpected runtime boot; one boot inside a deployment interval is planned |
+| Platform failure | Any native `server_failed` event in five minutes, including an explicit OOM kill even during deployment |
 | Missing telemetry | No fresh metrics/runtime samples within 15 minutes, missing limits, gaps, incomplete logs, or API/checker failure |
 
 Do not add overlapping deployment instances' memory and compare their sum with
@@ -145,7 +146,8 @@ task count, in-flight operation count, and event-loop lag. Operation records
 contain only the normalized operation name, duration, and outcome. No token,
 request body, feed content, user ID, or unbounded history is collected.
 
-Use raw request logs for incident counts. The August 31 audit found 118 actual
+Use raw request logs for incident counts. Render explicitly confirmed an OOM kill at 512 MiB on August 31 (`2026-08-31-oom.json`).
+The August 31 audit found 118 actual
 502 request logs where coarse metrics reported nine; percentage availability
 must not use inconsistent numerators and denominators. Invalid input and
 expected 401 challenges are not server outages. Partial operation responses

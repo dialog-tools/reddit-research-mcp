@@ -87,3 +87,30 @@ def test_restart_long_after_deploy_is_not_planned():
     findings, warming = classify_boots([boot],[deploy],NOW)
     assert findings[0]["signal"] == "restart"
     assert warming == set()
+
+
+def test_platform_oom_is_an_alert_even_during_deployment():
+    from scripts.check_production import evaluate_platform_events
+    event = {"event":{"type":"server_failed","timestamp":NOW.isoformat(),
+                      "details":{"reason":{"evicted":False,"oomKilled":{"memoryLimit":"512Mi"}}}}}
+    findings = evaluate_platform_events([event],NOW)
+    assert findings[0]["signal"] == "platform"
+    assert "out-of-memory" in findings[0]["detail"]
+
+
+def test_old_platform_failure_is_not_repeated_forever():
+    from scripts.check_production import evaluate_platform_events
+    event = {"event":{"type":"server_failed","timestamp":(NOW-timedelta(minutes=6)).isoformat(),
+                      "details":{"reason":{"oomKilled":{}}}}}
+    assert evaluate_platform_events([event],NOW) == []
+
+
+def test_planned_deploy_event_is_not_a_platform_failure():
+    from scripts.check_production import evaluate_platform_events
+    assert evaluate_platform_events([{"event":{"type":"deploy_ended","timestamp":NOW.isoformat()}}],NOW) == []
+
+
+def test_truncated_platform_failure_window_is_never_healthy():
+    from scripts.check_production import evaluate_platform_events, MonitoringError
+    with pytest.raises(MonitoringError):
+        evaluate_platform_events([{"event":{"type":"server_failed","timestamp":NOW.isoformat()}}]*100,NOW)

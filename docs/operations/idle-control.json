@@ -1,0 +1,27 @@
+{
+  "workload": "No MCP operations; loopback health/diagnostic polling only",
+  "duration_seconds": 600.3,
+  "samples": 748,
+  "exit_code": 0,
+  "oom_killed": false,
+  "memory_limit_bytes": 536870912,
+  "image": "sha256:5b603d66790001344d93c65b92195746c0aba36cb8ac313588f9fa755883b98b",
+  "counts": {
+    "sessions": [
+      0
+    ],
+    "tasks": [
+      6
+    ],
+    "threads": [
+      4
+    ],
+    "file_descriptors": [
+      10
+    ]
+  },
+  "rss_bytes_min": 128417792,
+  "rss_bytes_max": 128811008,
+  "python_bytes_first": 6457885,
+  "python_bytes_last": 6498104
+}

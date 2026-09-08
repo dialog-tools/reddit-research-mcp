@@ -1,5 +1,14 @@
 # Session retention investigation — September 8, 2026
 
+## Confirmed production interruption
+
+Render event `evt-daal54tbedkc73cc6gmg` explicitly records an out-of-memory kill
+at the 512 MiB limit on August 31 at 10:08:19 UTC. The service became available
+again at 10:08:37 UTC. This confirms the earlier memory/log correlation; the
+raw request logs recorded 118 502 responses around the interruption. The native
+event is preserved in `2026-08-31-oom.json`. September 4 remains a deployment
+replacement, without evidence that it was another OOM.
+
 ## Causal reproducer
 
 Production runtime inspection confirmed FastMCP 3.0.0 and MCP SDK 1.24.0.
@@ -92,6 +101,10 @@ locked version. Only tests shorten SDK expiry; production uses its public defaul
 - HTTP tests cover explicit DELETE, abandoned sessions, disconnected POSTs,
   active calls and GET streams, invalid initialization/session IDs, idle expiry,
   reinitialization, and configured canonical/legacy metadata identities.
+
+The separate ten-minute idle control completed with exit zero/no OOM, zero
+sessions, six tasks, four threads, and ten file descriptors throughout. RSS
+varied by less than 0.4 MiB; see `idle-control.json`.
 
 ## Long-running release gate
 

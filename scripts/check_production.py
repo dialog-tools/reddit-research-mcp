@@ -82,6 +82,22 @@ def evaluate_operations(records):
     return [finding("operations", f"{errors} operation failures in five minutes")] if errors >= 5 else []
 
 
+def evaluate_platform_events(entries, now):
+    events = [entry.get("event",entry) for entry in entries]
+    since = now-timedelta(minutes=5)
+    if len(events) >= 100 and all(timestamp(e["timestamp"]) >= since for e in events):
+        raise MonitoringError("Platform event query incomplete")
+    findings = []
+    for event in events:
+        if event.get("type") != "server_failed" or timestamp(event["timestamp"]) < since:
+            continue
+        reason = event.get("details",{}).get("reason",{})
+        detail = ("Render reported an out-of-memory kill" if reason.get("oomKilled") is not None
+                  else "Render reported a failed service instance")
+        findings.append(finding("platform",detail))
+    return findings
+
+
 def classify_boots(boots, deploys, now):
     """Allow one boot inside each deployment's actual build/start interval."""
     findings, warming, used_deploys = [], set(), set()
@@ -205,6 +221,8 @@ def check_private(token, now):
     boots = [r for r in runtime if r.get("event") == "runtime_boot"]
     deploys = api_get("/services/"+SERVICE+"/deploys", token, limit=5) if boots else []
     findings, warming = classify_boots(boots, deploys, now)
+    events = api_get("/services/"+SERVICE+"/events",token,limit=100)
+    findings.extend(evaluate_platform_events(events,now))
     findings.extend(evaluate_memory(usage, limits, now, warming))
     requests = read_logs(token, now, 5, type="request")
     errors = sum(any(l["name"] == "statusCode" and l["value"].startswith("5") for l in r["labels"]) for r in requests)
