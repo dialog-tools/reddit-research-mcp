@@ -106,6 +106,7 @@ Build curated feeds of the communities that matter to you, then come back to the
 | **MCP Tools** | 3 | discover_operations, get_operation_schema, execute_operation |
 | **Reddit Operations** | 5 | discover, search, fetch_posts, fetch_multiple, fetch_comments |
 | **Feed Operations** | 5 | create, list, get, update, delete |
+| **Web Search Integration** | 2 | search_web_supplement, get_search_suggestions (optional) |
 | **Indexed Subreddits** | 20,000+ | Active communities (2k+ members, updated weekly) |
 | **MCP Prompts** | 1 | reddit_research for automated workflows |
 | **Resources** | 1 | reddit://server-info for documentation |
@@ -195,6 +196,35 @@ Feeds let you save research configurations for ongoing monitoring:
 - **get_feed** - Retrieve a specific feed by ID
 - **update_feed** - Modify feed name, subreddits, or analysis
 - **delete_feed** - Remove a feed permanently
+
+</details>
+
+<details>
+<summary><strong>Optional You.com Web Search Integration</strong></summary>
+
+**Supplement Reddit research with broader web context**
+
+The server includes optional You.com integration to complement Reddit research with web search results. This is particularly useful for:
+
+- **External validation**: Cross-reference Reddit discussions with broader web sources
+- **Trend verification**: Confirm emerging trends mentioned in communities with news coverage  
+- **Expert insights**: Find academic papers and expert analysis related to Reddit discussions
+- **Context expansion**: Get technical documentation for tools discussed in developer communities
+
+### Setup (Optional)
+```bash
+# 1. Get a You.com API key from https://you.com/api
+# 2. Add to your environment:
+export YDC_API_KEY=your_youcom_api_key_here
+export YOUCOM_SEARCH_ENABLED=true
+```
+
+### Operations Added
+- `search_web_supplement`: Execute web searches with Reddit context
+- `get_search_suggestions`: Get smart search suggestions based on Reddit findings
+
+### Graceful Degradation
+If You.com isn't configured, the operations return helpful setup instructions instead of errors. Reddit research works perfectly without it.
 
 </details>
 
